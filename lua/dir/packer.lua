@@ -1,59 +1,77 @@
-local lsp = require("lsp-zero")
+-- This file can be loaded by calling `lua require('plugins')` from your init.vim
 
-lsp.preset("recommended")
+-- Only required if you have packer configured as `opt`
+vim.cmd.packadd('packer.nvim')
 
-lsp.ensure_installed({
-  'tsserver',
-  'rust_analyzer',
-})
+return require('packer').startup(function(use)
+  -- Packer can manage itself
+  use 'wbthomason/packer.nvim'
 
--- Fix Undefined global 'vim'
-lsp.nvim_workspace()
+  use {
+	  'nvim-telescope/telescope.nvim', tag = '0.1.0',
+	  -- or                            , branch = '0.1.x',
+	  requires = { {'nvim-lua/plenary.nvim'} }
+  }
 
+  use({
+	  'rose-pine/neovim',
+	  as = 'rose-pine',
+	  config = function()
+		  vim.cmd('colorscheme rose-pine')
+	  end
+  })
 
-local cmp = require('cmp')
-local cmp_select = {behavior = cmp.SelectBehavior.Select}
-local cmp_mappings = lsp.defaults.cmp_mappings({
-  ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
-  ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-  ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-  ["<C-Space>"] = cmp.mapping.complete(),
-})
+  use({
+      "folke/trouble.nvim",
+      config = function()
+          require("trouble").setup {
+              icons = false,
+              -- your configuration comes here
+              -- or leave it empty to use the default settings
+              -- refer to the configuration section below
+          }
+      end
+  })
 
-cmp_mappings['<Tab>'] = nil
-cmp_mappings['<S-Tab>'] = nil
+  use {
+			'nvim-treesitter/nvim-treesitter',
+			run = function()
+				local ts_update = require('nvim-treesitter.install').update({ with_sync = true })
+				ts_update()
+			end,}
+  use("nvim-treesitter/playground")
+  use("theprimeagen/harpoon")
+  use("theprimeagen/refactoring.nvim")
+  use("mbbill/undotree")
+  use("tpope/vim-fugitive")
+  use("nvim-treesitter/nvim-treesitter-context");
 
-lsp.setup_nvim_cmp({
-  mapping = cmp_mappings
-})
+  use {
+	  'VonHeikemen/lsp-zero.nvim',
+	  branch = 'v1.x',
+	  requires = {
+		  -- LSP Support
+		  {'neovim/nvim-lspconfig'},
+		  {'williamboman/mason.nvim'},
+		  {'williamboman/mason-lspconfig.nvim'},
 
-lsp.set_preferences({
-    suggest_lsp_servers = false,
-    sign_icons = {
-        error = 'E',
-        warn = 'W',
-        hint = 'H',
-        info = 'I'
-    }
-})
+		  -- Autocompletion
+		  {'hrsh7th/nvim-cmp'},
+		  {'hrsh7th/cmp-buffer'},
+		  {'hrsh7th/cmp-path'},
+		  {'saadparwaiz1/cmp_luasnip'},
+		  {'hrsh7th/cmp-nvim-lsp'},
+		  {'hrsh7th/cmp-nvim-lua'},
 
-lsp.on_attach(function(client, bufnr)
-  local opts = {buffer = bufnr, remap = false}
+		  -- Snippets
+		  {'L3MON4D3/LuaSnip'},
+		  {'rafamadriz/friendly-snippets'},
+	  }
+  }
 
-  vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, opts)
-  vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, opts)
-  vim.keymap.set("n", "<leader>vws", function() vim.lsp.buf.workspace_symbol() end, opts)
-  vim.keymap.set("n", "<leader>vd", function() vim.diagnostic.open_float() end, opts)
-  vim.keymap.set("n", "[d", function() vim.diagnostic.goto_next() end, opts)
-  vim.keymap.set("n", "]d", function() vim.diagnostic.goto_prev() end, opts)
-  vim.keymap.set("n", "<leader>vca", function() vim.lsp.buf.code_action() end, opts)
-  vim.keymap.set("n", "<leader>vrr", function() vim.lsp.buf.references() end, opts)
-  vim.keymap.set("n", "<leader>vrn", function() vim.lsp.buf.rename() end, opts)
-  vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
+  use("folke/zen-mode.nvim")
+  use("github/copilot.vim")
+  use("eandrju/cellular-automaton.nvim")
+  use("laytan/cloak.nvim")
+
 end)
-
-lsp.setup()
-
-vim.diagnostic.config({
-    virtual_text = true
-})
