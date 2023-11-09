@@ -51,6 +51,7 @@ end)
 lsp.ensure_installed({
   'tsserver',
   'rust_analyzer',
+  'java_language_server'
 })
 
 lsp.setup()
